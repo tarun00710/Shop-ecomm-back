@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const {ProductModel} =require('../Model/product-model');
 const userSchema = new mongoose.Schema({
   name:{
     type:String,
@@ -16,7 +17,14 @@ const userSchema = new mongoose.Schema({
   confirmpassword:{
     type:String,
     required:true
+  },
+  wishlist:[{type:mongoose.Schema.Types.ObjectId,ref:ProductModel}]
+  ,
+  cart:[{
+    quantity:{type:Number},
+    product:{type:mongoose.Schema.Types.ObjectId,ref:ProductModel}
   }
+  ]
 })
 //USER will be collection and User is class
 const User = mongoose.model('USER',userSchema);

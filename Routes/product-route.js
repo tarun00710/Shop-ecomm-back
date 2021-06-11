@@ -21,9 +21,7 @@ router.route("/")
         const NewProduct = new ProductModel(item);
         NewProduct.save();
     })
-    // const NewProduct = new ProductModel(product);
-    // const savedProduct = await NewProduct.save();
-    // res.json({ success: true, product: savedProduct })
+  
   }
   catch (err) {
     res.status(500).json({ success: false, message: "unable to add products", errorMessage: err.message})

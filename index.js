@@ -17,12 +17,12 @@ initializeDB();
 
 const productroutes= require("./Routes/product-route")
 const registerationroutes=require("./Routes/registration-route")
-const loginroutes=require("./Routes/login")
-
+const userroutes=require("./Routes/user-route")
+ 
 
 app.use("/products",productroutes);
 app.use("/registration",registerationroutes);
-app.use("/login",loginroutes);
+app.use("/user",userroutes);
 
 
 

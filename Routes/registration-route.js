@@ -7,7 +7,6 @@ const {User}=require('../Model/user-model');
 router.post("/",async(req,res)=>
 {
   try{
-    console.log(req.body);
     const {name,email,password,confirmpassword} = req.body;
     if(password !== confirmpassword)
        return res.status(422).json({error:"please enter same password"});
