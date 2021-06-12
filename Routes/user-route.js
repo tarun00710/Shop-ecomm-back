@@ -196,7 +196,7 @@ router.post('/:userId/updatecart/:productId',userIdCheckHandler,async(req, res)=
             }
         })
     }
-    res.json({success:true, updateCart})    
+    return res.json({success:true, updateCart})    
 
     }
     catch(error){
@@ -207,27 +207,23 @@ router.post('/:userId/updatecart/:productId',userIdCheckHandler,async(req, res)=
 router.post('/:userId/cart/:productId/update/:type',userIdCheckHandler,async(req,res)=>{
     try{
         const{userId,productId,type}=req.params;
-        console.log(type)
         const updateQty=await User.findByIdAndUpdate(userId,{"cart":[{product:productId}]}).select("cart.quantity")
-        console.log(updateQty.cart[0].quantity)
         if(type==="increaseQuantity"){
-            console.log("here")
             const updateProductQuantity=await User.findByIdAndUpdate(userId,
                 {
                     "cart":[{product:productId,quantity:updateQty.cart[0].quantity+1}]
                 },{new: true}
                 ).select("cart").populate("cart.product","-__v")
-                res.json({success:true,updateProductQuantity})
+                return res.json({success:true,updateProductQuantity})
         }
         else{
-            console.log("not here")
             const updateProductQuantity=await User.findByIdAndUpdate(userId,
                 {
                     "cart":[{product:productId,quantity:updateQty.cart[0].quantity-1}]
                 }
                 ,{new: true}
                 ).select("cart").populate("cart.product","-__v")
-                res.json({success:true,updateProductQuantity})
+                return res.json({success:true,updateProductQuantity})
         } 
     }catch(err){
         res.json({success:false,message:err})
