@@ -9,7 +9,7 @@ const  userIdCheckHandler = async (req, res, next) => {
         return res.json({success: false, message: "User not found"})
       }
       req.user=user;
-  }catch(e){console.log(e)}
+  }catch(e){res.send({success: false, message:e})}
   next();
 }
 module.exports ={userIdCheckHandler};

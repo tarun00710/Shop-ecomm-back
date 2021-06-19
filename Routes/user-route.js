@@ -1,4 +1,5 @@
 const express= require('express');
+const mongoose = require('mongoose');
 const {userIdCheckHandler} = require('../RouteHandler/userhandler')
 const router =express.Router();
 
@@ -7,7 +8,7 @@ const {User}=require("../Model/user-model.js")
 router.get('/',async(req,res)=>{
     const users=await User.find({});
     if(users)
-    res.send(users);
+    return res.send(users);
     res.send("no users found");
 })
 // router.use(userIdCheckHandler); not working will look into it
@@ -16,9 +17,9 @@ router.post('/login',async(req,res)=>{
         const {email,password}=req.body;
         const user = await User.findOne({email:email,password:password}).populate("cart.product wishlist", ("-__v"));
         if(user){
-            res.status(200).json({success: true,user})
+           return res.status(200).json({success: true,user})
         }
-        res.json({success: false,message:"User doesnt exist"})
+        return res.json({success: false,message:"User doesnt exist"})
     }catch(err){
         res.status(500).json({success: false,message:"Unable to login"})
     }
@@ -39,7 +40,7 @@ router.get('/:userId/cart',userIdCheckHandler,async(req, res)=>{
     try{
         const {user} = req;
         const getCart= await User.findById(user._id).select("cart").populate("cart.product","-__v")
-        res.json({success:true,getCart})
+        return res.json({success:true,getCart})
     }catch(error){
         res.send(error);
     }
@@ -52,12 +53,12 @@ router.post('/:userId/cart/:productId',userIdCheckHandler,async(req, res)=>{
         const productExists=productInCart.cart.find(cartitem=>String(cartitem.product)===productId)
         if(!productExists){
             const updatedCart = await User.findByIdAndUpdate(userId,{ "$push": { "cart": {"$each": [{product: productId, quantity: 1}], $position: 0,  } } }, {new: true}).select("cart").populate("cart.product",  "-__v");
-            res.json({success: true, updatedCart})
+            return res.json({success: true, updatedCart})
         }
             return res.json({success: false, message: "Product already exists in the Cart"})
 
         }catch(error){
-          res.status(500).json({success: false, message: "Couldn't update the Cart", errorMessage: error.message})
+          return res.status(500).json({success: false, message: "Couldn't update the Cart", errorMessage: error.message})
         }
       })
 
@@ -80,21 +81,21 @@ router.post('/:userId/wishlist/:productId',userIdCheckHandler,async(req, res)=>{
                     "wishlist":productId
                     }
             },{new:true})
-            res.json({success:true,message:addWishlist})
+           return res.json({success:true,message:addWishlist})
          }
-         res.json({success:false,message:"product already exists"})
+         return res.json({success:false,message:"product already exists"})
     }catch(error) {
-            res.json({error,message:"Unable to add to wishlist"});
+           return res.json({error,message:"Unable to add to wishlist"});
         }
     })
 router.get('/:userId/wishlist',userIdCheckHandler,async(req, res)=>{
 try{
     const {userId}=req.params;
     const getWishlist=await User.findById(userId).select("wishlist").populate("wishlist" ,"-__v");
-    res.send(getWishlist);
+    return res.send(getWishlist);
 
 }catch(error) {
-    res.error(error);
+    return res.error(error);
 }
 })
 
@@ -107,9 +108,9 @@ router.delete('/:userId/wishlist/:productId',userIdCheckHandler,async(req, res)=
                 "wishlist":productId
             }
         },{new: true}).select("wishlist").populate("wishlist","-__v");
-        res.json({success:true,data:productInWishlist});
+        return res.json({success:true,data:productInWishlist});
     }catch(error) {
-        res.json({success:false,message:"error",error})
+        return res.json({success:false,message:"error",error})
     }
 
 })
@@ -124,9 +125,9 @@ router.delete('/:userId/cart/:productId',userIdCheckHandler,async(req, res)=>{
             }
         },{new: true}).select("cart").populate("cart.product",  "-__v");
 
-        res.json({success: true,updatedCart})
+       return res.json({success: true,updatedCart})
     }catch(error) {
-        res.json({success: false,error})
+       return res.json({success: false,error})
     }
 })
 
@@ -163,17 +164,17 @@ router.post('/:userId/updatewishlist/:productId',userIdCheckHandler,async(req,re
                     "cart":[{product: productId,quantity:1}]
                 }
             },{new: true}).select("cart").populate("cart.product",  "-__v")
-            res.json({success:true,updateCart})
+           return res.json({success:true,updateCart})
         }
         else{
             const updateQuantity=await User.findByIdAndUpdate(userId,{
                 "cart":[{product: productId,quantity:quantity+1}]
             },{new: true}).select("cart").populate("cart.product",  "-__v")
-            res.json({success:true,updateQuantity})
+           return res.json({success:true,updateQuantity})
         }
     }
     catch(error){
-        res.json({success:false,message:"failed to move to cart"+error})
+      return  res.json({success:false,message:"failed to move to cart"+error})
     }
 })
 
@@ -196,37 +197,41 @@ router.post('/:userId/updatecart/:productId',userIdCheckHandler,async(req, res)=
             }
         })
     }
-    return res.json({success:true, updateCart})    
+    return res.status(200).json({success:true, updateCart})    
 
     }
     catch(error){
-        res.json({success:false,message:"Failed to move to wishlist",error})
+      return  res.json({success:false,message:"Failed to move to wishlist",error})
     }
 })
 //IncreaseOrdecreaseQuantity
 router.post('/:userId/cart/:productId/update/:type',userIdCheckHandler,async(req,res)=>{
     try{
         const{userId,productId,type}=req.params;
-        const updateQty=await User.findByIdAndUpdate(userId,{"cart":[{product:productId}]}).select("cart.quantity")
+        const userIdObj=mongoose.Types.ObjectId(userId);
+
+        const productIdObj=mongoose.Types.ObjectId(productId);
+
         if(type==="increaseQuantity"){
-            const updateProductQuantity=await User.findByIdAndUpdate(userId,
-                {
-                    "cart":[{product:productId,quantity:updateQty.cart[0].quantity+1}]
-                },{new: true}
-                ).select("cart").populate("cart.product","-__v")
-                return res.json({success:true,updateProductQuantity})
+            const userData = await User.findOne({_id:userIdObj});
+            userData.cart.find((item)=>String(item.product) === String(productIdObj)).quantity = userData.cart.find((item)=>String(item.product)===String(productIdObj)).quantity+1;
+            
+            const saveUser = await userData.save();
+            return res.json({success:true, saveUser})  
         }
         else{
-            const updateProductQuantity=await User.findByIdAndUpdate(userId,
-                {
-                    "cart":[{product:productId,quantity:updateQty.cart[0].quantity-1}]
-                }
-                ,{new: true}
-                ).select("cart").populate("cart.product","-__v")
-                return res.json({success:true,updateProductQuantity})
+           const userData = await User.findOne({_id:userIdObj})
+           console.log(userData.cart.find((item)=>String(item.product) === String(productIdObj)).quantity)
+           userData.cart.find((item)=>String(item.product) === String(productIdObj)).quantity = userData.cart.find((item)=>String(item.product)===String(productIdObj)).quantity-1;
+           
+           
+           const saveUser = await userData.save();
+
+           return res.json({success:true,saveUser}) 
         } 
     }catch(err){
-        res.json({success:false,message:err})
+        console.log("error",err)
+       return res.json({success:false,message:err})
     }
 })
 

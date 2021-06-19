@@ -25,6 +25,18 @@ const ProductSchema = new Schema({
     type:String,
     required:true,
   },
+  material:{
+    type:String
+  },
+  brand:{
+    type:String
+  },
+  ratings:{
+    type:Number
+  },
+  offer:{
+    type:String
+  },
   level:{
     type:String,
     required:true,

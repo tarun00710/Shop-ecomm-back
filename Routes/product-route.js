@@ -9,7 +9,7 @@ router.route("/")
 .get(async (req, res) => {
   try {
     const products = await ProductModel.find({});
-  res.json({ success: true, products })
+  return res.json({ success: true, products })
   } catch (err) {
     res.status(500).json({ success: false, message: "unable to get products", errorMessage: err.message })
   }
