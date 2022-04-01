@@ -11,7 +11,7 @@ router.get('/',async(req,res)=>{
     return res.send(users);
     res.send("no users found");
 })
-// router.use(userIdCheckHandler); not working will look into it
+
 router.post('/login',async(req,res)=>{
     try{
         const {email,password}=req.body;
@@ -24,8 +24,6 @@ router.post('/login',async(req,res)=>{
         res.status(500).json({success: false,message:"Unable to login"})
     }
 })
-
-
 
 router.get('/:userId',userIdCheckHandler,async (req, res) => {
     try{
@@ -61,14 +59,6 @@ router.post('/:userId/cart/:productId',userIdCheckHandler,async(req, res)=>{
           return res.status(500).json({success: false, message: "Couldn't update the Cart", errorMessage: error.message})
         }
       })
-
-        // }else{
-        //    const newQuantity=productExists.quantity+1; 
-        //    const quantityUpdate=await User.findByIdAndUpdate(userId,{"cart":[{product: productId, quantity:newQuantity}]},{new: true}).select("cart").populate("cart.product", "-__v");
-        //     res.json({success: true, quantityUpdate})
-        // }
-       
-    
 
 router.post('/:userId/wishlist/:productId',userIdCheckHandler,async(req, res)=>{
     try {
@@ -114,7 +104,6 @@ router.delete('/:userId/wishlist/:productId',userIdCheckHandler,async(req, res)=
     }
 
 })
-//REMOVE from cart
 
 router.delete('/:userId/cart/:productId',userIdCheckHandler,async(req, res)=>{
     try{
@@ -131,22 +120,6 @@ router.delete('/:userId/cart/:productId',userIdCheckHandler,async(req, res)=>{
     }
 })
 
-
-//REMOVE from wishlist
-// router.delete('/:userId/wishlist/:productId',userIdCheckHandler,async(req,res)=>{
-//     try{
-//         const updatedWishlist = await User.findByIdAndUpdate(userId,{
-//             "$pull":{
-//                 "wishlist":productId
-//             }
-//         }).select("wishlist").populate("wishlist","-__v")
-//         res.json(updatedWishlist);
-//     }catch(error){
-//         res.json({success: false,error})
-//     }
-// })
-
-//Move to cart
 router.post('/:userId/updatewishlist/:productId',userIdCheckHandler,async(req,res)=>{
     try{
         const {userId,productId} =req.params;
@@ -210,7 +183,7 @@ router.post('/:userId/cart/:productId/update/:type',userIdCheckHandler,async(req
         const{userId,productId,type}=req.params;
         const userIdObj=mongoose.Types.ObjectId(userId);
 
-        const productIdObj=mongoose.Types.ObjectId(productId);
+        const productIdObj = mongoose.Types.ObjectId(productId);
 
         if(type==="increaseQuantity"){
             const userData = await User.findOne({_id:userIdObj});

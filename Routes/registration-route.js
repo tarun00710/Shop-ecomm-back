@@ -15,12 +15,12 @@ router.post("/",async(req,res)=>
       console.log("User already exists")
       return res.status(422).json({success:false,error:"Email already registered",status:422})
     } 
-    const user =new User({email,name,password,confirmpassword});
+    const user = new User({email,name,password,confirmpassword});
     await user.save();
     res.status(201).json({success:true,message:"User successfully registered"});
     }catch(err) {
       console.log(err);
-    }
-  
+    } 
 })
+
 module.exports=router;
